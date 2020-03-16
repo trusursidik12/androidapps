@@ -18,6 +18,7 @@ import java.io.FileInputStream
 import java.io.IOException
 import android.graphics.Color
 import android.net.Uri
+import android.net.http.SslError
 import android.os.*
 import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
@@ -196,6 +197,7 @@ class MainActivity : AppCompatActivity() {
             webview.addJavascriptInterface(chromeClient, "jsi" );
             webview.getSettings().setAllowFileAccess(true);
             webview.getSettings().setAllowContentAccess(true);
+            webview.getSettings().setGeolocationEnabled(true);
             webview.clearCache(true);
             webview!!.webViewClient = object : WebViewClient() {
                 override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
@@ -239,6 +241,10 @@ class MainActivity : AppCompatActivity() {
                     // TODO Auto-generated method stub
                     super.onPageFinished(view, url)
                     progressBar.setVisibility(View.GONE)
+                }
+
+                override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+                    handler?.proceed()
                 }
             }
             //webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)

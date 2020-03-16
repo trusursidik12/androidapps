@@ -9,9 +9,9 @@ android {
     defaultConfig {
         applicationId "com.ispumap"
         minSdkVersion 22
-        targetSdkVersion 26
-        versionCode 10
-        versionName "1.0"
+        targetSdkVersion 28
+        versionCode 12
+        versionName "1.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">ISPUMAP</string>
-    <string name="SERVER_HOST">http://103.247.11.149/ispumap/</string>
+    <string name="SERVER_HOST">https://103.247.11.149/ispumap/</string>
 </resources>
