@@ -1,387 +1,192 @@
 package com.ispumap
 
-import android.annotation.TargetApi
-import android.app.*
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.media.RingtoneManager
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
-import android.support.v7.app.AppCompatActivity
-import android.widget.Toast
-import okhttp3.*
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import android.graphics.Color
-import android.net.Uri
-import android.net.http.SslError
-import android.os.*
-import android.provider.MediaStore
-import android.support.v4.app.NotificationCompat
-import android.view.View
-import android.webkit.*
-import android.widget.ProgressBar
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationManager
+import android.os.Bundle
+import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 
 
-var TOKEN = ""
+var LATITUDE = ""
+var LONGITUDE = ""
 
-fun isNetworkAvailable(context: Context): Boolean {
-    val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    var activeNetworkInfo: NetworkInfo? = null
-    activeNetworkInfo = cm.activeNetworkInfo
-    return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting
-}
-
-fun readNotification(context: Context){
-    if(TOKEN != "") {
-        val url = context.getResources().getString(R.string.SERVER_HOST) + "read_notification.php?token="+TOKEN
-        val client = OkHttpClient()
-        val request = Request.Builder().url(url).build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
-            }
-            @Throws(IOException::class)
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseGET = response.body()!!.string()
-                    if (responseGET != "") {
-                        val responseGETs = responseGET.split("]]]")
-                        if (responseGETs.size > 0) {
-                            responseGETs.forEach {
-                                val responses = it.split("|||")
-                                if (responses.size > 1) {
-                                    showNotification(context.applicationContext, context.getResources().getString(R.string.app_name), responses[1].toString(), responses[0].toInt())
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        })
-    }
-    //Handler().postDelayed({ readNotification(context) }, 5000)
-}
-
-fun readVersion(context: Context){
-    val url = context.getResources().getString(R.string.SERVER_HOST) + "get_version.php"
-    val client = OkHttpClient()
-    val request = Request.Builder().url(url).build()
-    client.newCall(request).enqueue(object : Callback {
-        override fun onFailure(call: Call, e: IOException) {
-            e.printStackTrace()
+class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,OnMapReadyCallback {
+    private var mGoogleApiClient: GoogleApiClient? = null
+    private var mLocation: Location? = null
+    private var locationManager: LocationManager? = null
+    private var mLocationManager: LocationManager? = null
+    private var mLocationRequest: LocationRequest? = null
+    private val UPDATE_INTERVAL = (2 * 1000).toLong()
+    private val isLocationEnabled: Boolean
+        get() {
+            locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            return locationManager!!.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager!!.isProviderEnabled(
+                    LocationManager.NETWORK_PROVIDER)
         }
-        @Throws(IOException::class)
-        override fun onResponse(call: Call, response: Response) {
-            if (response.isSuccessful) {
-                val getVersion = response.body()!!.string().toLong()
-                if (getVersion  > context.packageManager.getPackageInfo("com.ispumap", 0).versionCode) {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://play.google.com/store/apps/details?id=com.ispumap")
-                    context.startActivity(intent)
-                }
-            }
-        }
-    })
-}
-
-fun showNotification(context: Context,title:String,message:String,mNotificationId: Int = 1000){
-    lateinit var mNotification: Notification
-    var notificationManager: NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    val notifyIntent = Intent(context, MainActivity::class.java)
-
-    notifyIntent.putExtra("mNotified", true)
-    notifyIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-
-    val pendingIntent = PendingIntent.getActivity(context, 0, notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-    val res = context.resources
-    val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        val CHANNEL_ID = "Ispumap"
-        val name = "Ispumap"
-        val Description = "Ispumap Channel"
-        val importance = NotificationManager.IMPORTANCE_HIGH
-        val mChannel = NotificationChannel(CHANNEL_ID, name, importance)
-        mChannel.description = Description
-        mChannel.enableLights(true)
-        mChannel.lightColor = Color.RED
-        mChannel.enableVibration(true)
-        mChannel.vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
-        mChannel.setShowBadge(false)
-        notificationManager.createNotificationChannel(mChannel)
-
-        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_stat_name)
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
-                .setPriority(Notification.PRIORITY_MAX)
-                .setContentTitle(title)
-                .setSound(uri)
-                .setContentText(message)
-
-        val resultIntent = Intent(context, MainActivity::class.java)
-        val stackBuilder = TaskStackBuilder.create(context)
-        stackBuilder.addParentStack(MainActivity::class.java)
-        stackBuilder.addNextIntent(resultIntent)
-        val resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-
-        builder.setContentIntent(resultPendingIntent)
-
-        notificationManager.notify(mNotificationId, builder.build())
-    } else {
-        mNotification = Notification.Builder(context)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_stat_name)
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
-                .setPriority(Notification.PRIORITY_MAX)
-                .setContentTitle(title)
-                .setStyle(Notification.BigTextStyle()
-                        .bigText(message))
-                .setSound(uri)
-                .setContentText(message).build()
-        notificationManager.notify(mNotificationId, mNotification)
-    }
-
-}
-
-class MainActivity : AppCompatActivity() {
-    private var mUploadMessage: ValueCallback<Uri>? = null
-    private var mUploadMessages: ValueCallback<Array<Uri>>? = null
-    private val FILECHOOSER_RESULTCODE = 1
-    private val KITKAT_RESULTCODE = 2
-    private lateinit var mCapturedImageURI: Uri
-    private lateinit var webview: WebView
-
-    internal var chromeClient: WebChromeClient = object : WebChromeClient() {
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>) { }
-        fun openFileChooser(uploadMsg: ValueCallback<*>, acceptType: String) { }
-        fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
-            mUploadMessage = uploadMsg
-            val i = Intent(Intent.ACTION_GET_CONTENT)
-            i.addCategory(Intent.CATEGORY_OPENABLE)
-            i.type = "*/*"
-            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), FILECHOOSER_RESULTCODE)
-        }
-        fun showPicker(uploadMsg: ValueCallback<Uri>) {
-            mUploadMessage = uploadMsg
-            val i = Intent(Intent.ACTION_GET_CONTENT)
-            i.addCategory(Intent.CATEGORY_OPENABLE)
-            i.type = "*/*"
-            this@MainActivity.startActivityForResult(Intent.createChooser(i, "File Chooser"), KITKAT_RESULTCODE)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
-        webview = findViewById(R.id.webview) as WebView
-        var progressBar: ProgressBar = findViewById<View>(R.id.progressBar1) as ProgressBar
 
-        if (isNetworkAvailable(this@MainActivity)) {
-            val path = this@MainActivity.getFilesDir()
-            val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
-            if(filename.exists()){
-                TOKEN = FileInputStream(filename).bufferedReader().use { it.readText() }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) != PackageManager.PERMISSION_GRANTED
+                || (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED)
+        ) {
+            val permission_camera = arrayOf(
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.CAMERA,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            ActivityCompat.requestPermissions(this, permission_camera, 1)
+        }
+
+        if(areThereMockPermissionApps(this@MainActivity) && isMockSettingsON(this@MainActivity)){
+            val confirmation = AlertDialog.Builder(this@MainActivity)
+            confirmation.setTitle("Peringatan")
+            confirmation.setMessage("Device Anda terdeteksi mengizinkan akses 'Mock Location', Harap matikan perizinan akses 'Mock Location' tersebut, lalu hidupkan ulang Apps ini kembali.")
+            confirmation.setPositiveButton("OK"){dialog, which -> }
+            val dialog: AlertDialog = confirmation.create()
+            dialog.show()
+            dialog.setOnDismissListener {
             }
-            webview = WebView(this)
-            webview.getSettings().setAppCacheMaxSize( 10 * 1024 * 1024 ); // 10MB
-            webview.getSettings().setAppCachePath( getApplicationContext().getCacheDir().getAbsolutePath() );
-            webview.getSettings().setAppCacheEnabled(true);
-            webview.getSettings().setCacheMode( WebSettings.LOAD_DEFAULT ); // load online by default
-            webview.getSettings().setJavaScriptEnabled(true)
-            webview.addJavascriptInterface(chromeClient, "jsi" );
-            webview.getSettings().setAllowFileAccess(true);
-            webview.getSettings().setAllowContentAccess(true);
-            webview.getSettings().setGeolocationEnabled(true);
-            webview.clearCache(true);
-            webview!!.webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
-                    // TODO Auto-generated method stub
-                    super.onPageStarted(view, url, favicon)
+        }
+
+        mGoogleApiClient = GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build()
+        mLocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        isGPSon()
+        if (mGoogleApiClient != null) mGoogleApiClient!!.connect()
+    }
+
+
+    @SuppressLint("MissingPermission")
+    override fun onConnected(p0: Bundle?) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissions,0)
+        }
+        startLocationUpdates()
+        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient)
+        if (mLocation == null) startLocationUpdates()
+    }
+
+    override fun onConnectionSuspended(i: Int) {
+        mGoogleApiClient!!.connect()
+    }
+
+    override fun onConnectionFailed(connectionResult: ConnectionResult) {
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (mGoogleApiClient!!.isConnected()) {
+            mGoogleApiClient!!.disconnect()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    protected fun startLocationUpdates() {
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(UPDATE_INTERVAL)
+                .setFastestInterval(UPDATE_INTERVAL)
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissions,0)
+        }
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mLocationRequest, this)
+    }
+
+    override fun onLocationChanged(location: Location) {
+        LATITUDE = java.lang.Double.toString(location.latitude)
+        LONGITUDE = java.lang.Double.toString(location.longitude)
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFragment!!.getMapAsync(this)
+    }
+
+    private fun isGPSon(): Boolean {
+        if (!isLocationEnabled) showAlert_GPSisOff()
+        return isLocationEnabled
+    }
+
+    private fun showAlert_GPSisOff() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setTitle("Enable Location")
+                .setMessage("Your Locations Settings is set to 'Off'.\nPlease Enable Location to " + "use this app")
+                .setPositiveButton("Location Settings") { paramDialogInterface, paramInt ->
+                    val myIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(myIntent)
                 }
-                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                .setNegativeButton("Cancel") { paramDialogInterface, paramInt -> }
+        dialog.show()
+    }
 
+    fun isMockSettingsON(context: Context): Boolean {
+        return if(Settings.Secure.getString( context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION ).equals("0")) false
+        else true
+    }
 
-                    if(url != null) {
-                        if (url.toString().contains("https://api.whatsapp.com/send")) {
-                            view?.getContext()?.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)));
-                        }else{
-                            view?.loadUrl(url);
-
-                            if (url.toString().contains("set_apps_token=")) {
-                                val temp = url.split("set_apps_token=")
-                                TOKEN = temp[1]
-                                if(TOKEN!="") {
-                                    val path = this@MainActivity.getFilesDir()
-                                    val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
-                                    filename.writeText(TOKEN)
-                                    webview!!.loadUrl(url.replace("set_apps_token=" + TOKEN,""))
-                                }
-                            }
-                            if (url.toString().contains("logout_success=1")) {
-                                val path = this@MainActivity.getFilesDir()
-                                val filename = File(path.toString() + "/bWFya29wZWxhZ28=.dat")
-                                TOKEN = ""
-                                filename.writeText(TOKEN )
-                                webview!!.loadUrl(url.replace("logout_success=1",""))
-                            }
-                        }
-                    } else {
-                        view?.loadUrl(url);
+    fun areThereMockPermissionApps(context: Context): Boolean {
+        var count = 0
+        val pm = context.packageManager
+        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        for (applicationInfo in packages) {
+            try {
+                val packageInfo = pm.getPackageInfo(
+                        applicationInfo.packageName,
+                        PackageManager.GET_PERMISSIONS
+                )
+                val requestedPermissions = packageInfo.requestedPermissions
+                if (requestedPermissions != null) {
+                    for (i in requestedPermissions.indices) {
+                        if (requestedPermissions[i] == "android.permission.ACCESS_MOCK_LOCATION" && applicationInfo.packageName != context.packageName) count++
                     }
-
-                    return true
                 }
-                override fun onPageFinished(view: WebView, url: String) {
-                    // TODO Auto-generated method stub
-                    super.onPageFinished(view, url)
-                    progressBar.setVisibility(View.GONE)
-                }
-
-                override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
-                    handler?.proceed()
-                }
-            }
-            //webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST) + "android_apps.php?token=" + TOKEN)
-            webview!!.loadUrl(this@MainActivity.getResources().getString(R.string.SERVER_HOST))
-
-            webview!!.setWebChromeClient(object : WebChromeClient() {
-                fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String = "") {
-                    mUploadMessage = uploadMsg
-                    openImageChooser()
-                }
-                override fun onShowFileChooser(mWebView: WebView, filePathCallback: ValueCallback<Array<Uri>>, fileChooserParams: WebChromeClient.FileChooserParams): Boolean {
-                    mUploadMessages = filePathCallback
-                    openImageChooser()
-                    return true
-                }
-                fun openFileChooser(uploadMsg: ValueCallback<Uri>, acceptType: String, capture: String) {
-                    openFileChooser(uploadMsg, acceptType)
-                }
-            })
-            setContentView(webview)
-
-            //readWebView(this@MainActivity,webview)
-            //readVersion(this@MainActivity)
-            //readNotification(this@MainActivity)
-
-        } else {
-            Toast.makeText(this@MainActivity,"Please check your internet connection, then restart this App",Toast.LENGTH_SHORT).show()
+            } catch (t: Throwable) { }
         }
+        return if (count > 0) true else false
     }
 
-    private fun openImageChooser() {
-        try {
-            val imageStorageDir = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "FolderName")
-            if (!imageStorageDir.exists()) {
-                imageStorageDir.mkdirs()
-            }
-            val file = File(imageStorageDir.toString() + File.separator + "IMG_" + System.currentTimeMillis().toString() + ".jpg")
-            mCapturedImageURI = Uri.fromFile(file)
-
-            val captureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            captureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mCapturedImageURI)
-
-            val i = Intent(Intent.ACTION_GET_CONTENT)
-            i.addCategory(Intent.CATEGORY_OPENABLE)
-            i.type = "image/*"
-
-            val chooserIntent = Intent.createChooser(i, "Image Chooser")
-            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf<Parcelable>(captureIntent))
-
-            startActivityForResult(chooserIntent, FILECHOOSER_RESULTCODE)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    protected override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-        super.onActivityResult(requestCode, resultCode, intent)
-        if (requestCode == FILECHOOSER_RESULTCODE) {
-            if (null == mUploadMessage && null == mUploadMessages) {
-                return
-            }
-            if (null != mUploadMessage) {
-                handleUploadMessage(requestCode, resultCode, intent)
-            } else if (mUploadMessages != null) {
-                handleUploadMessages(requestCode, resultCode, intent)
-            }
-        }
-    }
-
-    private fun handleUploadMessage(requestCode: Int, resultCode: Int, intent: Intent?) {
-        var result: Uri? = null
-        try {
-            if (resultCode != Activity.RESULT_OK) {
-                result = null
-            } else {
-                result = if (intent == null) mCapturedImageURI else intent.data
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        try {
-            mUploadMessage!!.onReceiveValue(result)
-            mUploadMessage = null
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private fun handleUploadMessages(requestCode: Int, resultCode: Int, intent: Intent?) {
-        var results: Array<Uri>? = null
-        try {
-            if (resultCode != Activity.RESULT_OK) {
-                results = null
-            } else {
-                if (intent != null) {
-                    val dataString = intent.dataString
-                    val clipData = intent.clipData
-                    if (clipData != null) {
-                        //results = arrayOfNulls(clipData.itemCount)
-                        for (i in 0 until clipData.itemCount) {
-                            val item = clipData.getItemAt(i)
-                            results!![i] = item.uri
-                        }
-                    }
-                    if (dataString != null) {
-                        results = arrayOf(Uri.parse(dataString))
-                    }
-                } else {
-                    results = arrayOf<Uri>(mCapturedImageURI)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        try {
-            mUploadMessages!!.onReceiveValue(results)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        try {
-            mUploadMessages = null
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-    }
-
-    override fun onBackPressed() {
-        if (webview.canGoBack()) {
-            webview.goBack()
-        } else {
-            moveTaskToBack(true)
-            System.exit(-1)
-        }
+    override fun onMapReady(googleMap: GoogleMap) {
+        val sydney = LatLng(LATITUDE.toDouble(), LONGITUDE.toDouble())
+        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
     }
 }
