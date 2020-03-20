@@ -3,5 +3,19 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
-    <color name="spalshBgColor">#FBFBFB</color>
+    <color name="spalshBgColor">#FFFFFF</color>
+    <color name="BAIK">#00FF00</color>
+    <color name="STROKE_BAIK">#28A745</color>
+    <color name="SEDANG">#0000FF</color>
+    <color name="STROKE_SEDANG">#007BFF</color>
+    <color name="TIDAK_SEHAT">#FFFF00</color>
+    <color name="STROKE_TIDAK_SEHAT">#FFC107</color>
+    <color name="SANGAT_TIDAK_SEHAT">#FF0000</color>
+    <color name="STROKE_SANGAT_TIDAK_SEHAT">#DC3545</color>
+    <color name="BERBAHAYA">#000000</color>
+    <color name="STROKE_BERBAHAYA">#343A40</color>
+    <color name="NONE">#00000000</color>
+    <color name="STROKE_NONE">#00000000</color>
+    <color name="BG_TITLE">#FFFFFF</color>
+    <color name="MarkerTitle">#FFFFFF</color>
 </resources>

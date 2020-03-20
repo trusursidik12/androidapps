@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="provinces">
+        <item>aceh</item>
+        <item>sumaterabarat</item>
+        <item>yogyakarta</item>
+        <item>sumaterautara</item>
+    </string-array>
+</resources>
