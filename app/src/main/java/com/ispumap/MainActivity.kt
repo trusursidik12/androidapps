@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
+import android.view.Menu
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -27,12 +28,15 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.bottomnavigation.BottomNavigationMenu
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.ui.IconGenerator
+import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -108,15 +112,27 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
                     LocationManager.NETWORK_PROVIDER)
         }
     private lateinit var loading: ProgressBar
+
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.nav_home -> {
+                recreate()
+            }
+            R.id.nav_city_detail -> {
+                Toast.makeText(this@MainActivity,"nav_city_detail", Toast.LENGTH_SHORT).show()
+            }
+        }
+        false
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
+        bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
         mapFragment!!.getMapAsync(this)
-
         if (isNetworkAvailable(this@MainActivity)) {
             readVersion(this@MainActivity)
         } else {
@@ -336,8 +352,8 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
                                     markers_lng[marker_id] = ispu.getString("lng").toDouble()
                                     markers_cat[marker_id] = ispu.getString("category").toUpperCase()
                                     markers_title[marker_id] = ispu.getString("category")
-                                    if(ispu.getString("worst_ispu").toInt() > 0)
-                                        markers_title[marker_id] = markers_title[marker_id] + "\n\r" + ispu.getString("worst_ispu")
+//                                    if(ispu.getString("worst_ispu").toInt() > 0)
+//                                        markers_title[marker_id] = markers_title[marker_id] + "\n\r" + ispu.getString("worst_ispu")
                                     marker_id++;
                                 }
                             }

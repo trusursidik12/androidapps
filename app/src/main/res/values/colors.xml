@@ -18,4 +18,7 @@
     <color name="STROKE_NONE">#00000000</color>
     <color name="BG_TITLE">#FFFFFF</color>
     <color name="MarkerTitle">#FFFFFF</color>
+    <color name="bottomMenu">#F8F9FA</color>
+    <color name="iconMenu">#343A40</color>
+    <color name="iconMenuActive">#009EE5</color>
 </resources>
