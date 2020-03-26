@@ -82,20 +82,20 @@
             <ImageView android:src="@drawable/wind_speed" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
         </TableRow>
         <TableRow>
-            <TextView android:id="@+id/pressure" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
-            <TextView android:id="@+id/temparature" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
-            <TextView android:id="@+id/wind_direction" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
-            <TextView android:id="@+id/wind_speed" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
+            <TextView android:id="@+id/pressure" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold"/>
+            <TextView android:id="@+id/temperature" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/wind_direction" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/wind_speed" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
         </TableRow>
         <TableRow android:layout_marginTop="10dp">
-            <ImageView android:src="@drawable/humidity" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+            <ImageView android:src="@drawable/humidity" android:layout_height="30dp" android:layout_width="30dp"/>
             <ImageView android:src="@drawable/rain_rate" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
             <ImageView android:src="@drawable/solar_radiation" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
         </TableRow>
         <TableRow>
-            <TextView android:id="@+id/humidity" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
-            <TextView android:id="@+id/rain_rate" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
-            <TextView android:id="@+id/solar_radiation" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:text="423"/>
+            <TextView android:id="@+id/humidity" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold"/>
+            <TextView android:id="@+id/rain_rate" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/solar_radiation" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
         </TableRow>
     </TableLayout>
 </LinearLayout>
