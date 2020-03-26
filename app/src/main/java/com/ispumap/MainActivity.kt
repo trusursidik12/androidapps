@@ -2,9 +2,13 @@ package com.ispumap
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationManager
 import android.net.ConnectivityManager
@@ -13,9 +17,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
-import android.view.Menu
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,8 +35,6 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.bottomnavigation.BottomNavigationMenu
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
@@ -46,6 +49,10 @@ import java.lang.reflect.Field
 var LATITUDE = ""
 var LONGITUDE = ""
 var client = OkHttpClient()
+var  category = "SEDANG"
+var  StasiunName = "Ciwandan"
+var  City = "Cilegon"
+var  Province = "Banten"
 
 fun isNetworkAvailable(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -124,10 +131,12 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         }
         false
     }
+    private lateinit var popup_stasiun_detail: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        popup_stasiun_detail = Dialog(this@MainActivity);
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
@@ -180,6 +189,39 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         mLocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         isGPSon()
         if (mGoogleApiClient != null) mGoogleApiClient!!.connect()
+        ShowPopup()
+    }
+
+    fun ShowPopup() {
+        popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
+        popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val txt_close: TextView = popup_stasiun_detail.findViewById<View>(R.id.close) as TextView
+        val ic_emoticon: ImageView = popup_stasiun_detail.findViewById<View>(R.id.emoticon) as ImageView
+        val txt_category: TextView = popup_stasiun_detail.findViewById<View>(R.id.category) as TextView
+        val txt_stasiun_name: TextView = popup_stasiun_detail.findViewById<View>(R.id.stasiun_name) as TextView
+        val txt_city: TextView = popup_stasiun_detail.findViewById<View>(R.id.city) as TextView
+        val txt_province: TextView = popup_stasiun_detail.findViewById<View>(R.id.province) as TextView
+
+
+        txt_close.setOnClickListener(View.OnClickListener { popup_stasiun_detail.dismiss() })
+        txt_category.setText("STATUS : " + category)
+        if(category == "BAIK"){
+            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_baik))
+        } else if(category == "SEDANG"){
+            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sedang))
+        } else if(category == "TIDAK_SEHAT") {
+            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_tidak_sehat))
+        } else if(category == "SANGAT_TIDAK_SEHAT") {
+            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sangat_tidak))
+        } else if(category == "BERBAHAYA") {
+            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_berbahaya))
+        }
+        txt_stasiun_name.setText(StasiunName)
+        txt_city.setText(City)
+        txt_province.setText(Province)
+
+        popup_stasiun_detail.show()
+        loading.visibility = View.GONE
     }
 
 
