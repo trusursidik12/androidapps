@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+<LinearLayout
     android:orientation="vertical"
     android:layout_width="300dp"
     android:layout_height="475dp"
     android:background="@color/white"
+    android:scrollbars="vertical"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
     android:layout_gravity="center">
     <TextView
         android:id="@+id/close"
@@ -37,41 +43,41 @@
         </TableRow>
     </TableLayout>
     <TableLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
-        <TableRow android:layout_marginTop="10dp">
-            <TextView android:text="Nama Stasiun"/>
-            <TextView android:text=" : "/>
-            <TextView android:id="@+id/stasiun_name" android:text="" android:textStyle="bold"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:text="Kota"/>
-            <TextView android:text=" : "/>
-            <TextView android:id="@+id/city" android:text="" android:textStyle="bold"/>
-        </TableRow>
-        <TableRow>
-            <TextView android:text="Proponsi"/>
-            <TextView android:text=" : "/>
-            <TextView android:id="@+id/province" android:text="" android:textStyle="bold"/>
-        </TableRow>
-    </TableLayout>
+    <TableRow android:layout_marginTop="10dp">
+        <TextView android:text="Nama Stasiun"/>
+        <TextView android:text=" : "/>
+        <TextView android:id="@+id/stasiun_name" android:text="" android:textStyle="bold"/>
+    </TableRow>
+    <TableRow>
+        <TextView android:text="Kota"/>
+        <TextView android:text=" : "/>
+        <TextView android:id="@+id/city" android:text="" android:textStyle="bold"/>
+    </TableRow>
+    <TableRow>
+        <TextView android:text="Proponsi"/>
+        <TextView android:text=" : "/>
+        <TextView android:id="@+id/province" android:text="" android:textStyle="bold"/>
+    </TableRow>
+</TableLayout>
     <TableLayout android:layout_marginTop="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
         <TableRow android:layout_height="40dp">
             <TextView android:text="PM10" android:textStyle="bold" android:padding="5dp"/>
-            <TextView android:id="@+id/pm10" android:background="@drawable/bgtext_sedang" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white" android:text="123"/>
+            <TextView android:id="@+id/pm10" android:background="@drawable/bgtext_sedang" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
 
 
             <TextView android:text="O3" android:textStyle="bold" android:padding="5dp" android:layout_marginLeft="40dp"/>
-            <TextView android:id="@+id/o3" android:background="@drawable/bgtext_sangat_tidak" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white" android:text="323"/>
+            <TextView android:id="@+id/o3" android:background="@drawable/bgtext_sangat_tidak" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
         </TableRow>
         <TableRow android:layout_marginTop="10dp" android:layout_height="40dp">
             <TextView android:text="SO2" android:textStyle="bold" android:padding="5dp"/>
-            <TextView android:id="@+id/so2" android:background="@drawable/bgtext_baik" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white" android:text="12"/>
+            <TextView android:id="@+id/so2" android:background="@drawable/bgtext_baik" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
 
             <TextView android:text="NO2" android:textStyle="bold" android:padding="5dp" android:layout_marginLeft="40dp"/>
-            <TextView android:id="@+id/no2" android:background="@drawable/bgtext_berbahaya" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white" android:text="423"/>
+            <TextView android:id="@+id/no2" android:background="@drawable/bgtext_berbahaya" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
         </TableRow>
         <TableRow android:layout_marginTop="10dp" android:layout_height="40dp">
             <TextView android:text="CO" android:textStyle="bold" android:padding="5dp"/>
-            <TextView android:id="@+id/co" android:background="@drawable/bgtext_tidak_sehat" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white" android:text="342"/>
+            <TextView android:id="@+id/co" android:background="@drawable/bgtext_tidak_sehat" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
         </TableRow>
     </TableLayout>
     <TableLayout android:layout_marginTop="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
@@ -98,4 +104,63 @@
             <TextView android:id="@+id/solar_radiation" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
         </TableRow>
     </TableLayout>
+
+    <!--TableLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
+        <TableRow android:layout_marginTop="20dp">
+            <TextView
+                android:layout_width="250dp"
+                android:textSize="20dp"
+                android:text="Prediksi Esok Hari"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_gravity="center"
+                />
+        </TableRow>
+    </TableLayout>
+    <TableLayout android:layout_marginTop="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
+        <TableRow android:layout_height="40dp">
+            <TextView android:text="PM10" android:textStyle="bold" android:padding="5dp"/>
+            <TextView android:id="@+id/pm10_1" android:background="@drawable/bgtext_sedang" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
+
+
+            <TextView android:text="O3" android:textStyle="bold" android:padding="5dp" android:layout_marginLeft="40dp"/>
+            <TextView android:id="@+id/o3_1" android:background="@drawable/bgtext_sangat_tidak" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
+        </TableRow>
+        <TableRow android:layout_marginTop="10dp" android:layout_height="40dp">
+            <TextView android:text="SO2" android:textStyle="bold" android:padding="5dp"/>
+            <TextView android:id="@+id/so2_1" android:background="@drawable/bgtext_baik" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
+
+            <TextView android:text="NO2" android:textStyle="bold" android:padding="5dp" android:layout_marginLeft="40dp"/>
+            <TextView android:id="@+id/no2_1" android:background="@drawable/bgtext_berbahaya" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
+        </TableRow>
+        <TableRow android:layout_marginTop="10dp" android:layout_height="40dp">
+            <TextView android:text="CO" android:textStyle="bold" android:padding="5dp"/>
+            <TextView android:id="@+id/co_1" android:background="@drawable/bgtext_tidak_sehat" android:textAlignment="center" android:paddingTop="5dp" android:layout_marginLeft="10dp" android:textColor="@color/white"/>
+        </TableRow>
+    </TableLayout>
+    <TableLayout android:layout_marginTop="20dp" android:layout_marginBottom="20dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingLeft="20dp" android:paddingRight="20dp">
+        <TableRow>
+            <ImageView android:src="@drawable/pressure" android:layout_height="30dp" android:layout_width="30dp"/>
+            <ImageView android:src="@drawable/temparature" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+            <ImageView android:src="@drawable/wind_direction" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+            <ImageView android:src="@drawable/wind_speed" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:id="@+id/pressure_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold"/>
+            <TextView android:id="@+id/temperature_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/wind_direction_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/wind_speed_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+        </TableRow>
+        <TableRow android:layout_marginTop="10dp">
+            <ImageView android:src="@drawable/humidity" android:layout_height="30dp" android:layout_width="30dp"/>
+            <ImageView android:src="@drawable/rain_rate" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+            <ImageView android:src="@drawable/solar_radiation" android:layout_height="30dp" android:layout_width="30dp" android:layout_marginLeft="30dp"/>
+        </TableRow>
+        <TableRow>
+            <TextView android:id="@+id/humidity_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold"/>
+            <TextView android:id="@+id/rain_rate_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+            <TextView android:id="@+id/solar_radiation_1" android:textAlignment="center" android:paddingTop="2dp" android:textStyle="bold" android:layout_marginLeft="20dp"/>
+        </TableRow>
+    </TableLayout-->
 </LinearLayout>
+</ScrollView>

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationManager
 import android.net.ConnectivityManager
@@ -53,13 +52,30 @@ var  category = "SEDANG"
 var  StasiunName = "Ciwandan"
 var  City = "Cilegon"
 var  Province = "Banten"
-var  pressure = "1007.4\nmBar"
-var  temperature = "28.3\n°C"
-var  wind_speed = "13\nKm/h"
-var  wind_direction = "145°"
-var  humidity = "85%"
-var  rain_rate = "4.4\nmm/jam"
-var  solar_radiation = "63\nwatt/m2"
+var  pm10 = 100
+var  so2 = 200
+var  co = 300
+var  o3 = 400
+var  no2 = 500
+var  pressure = 1007.4f
+var  temperature = 28.3f
+var  wind_speed = 13f
+var  wind_direction = 145f
+var  humidity = 85f
+var  rain_rate = 4.4f
+var  solar_radiation = 63f
+/*var  pm10_1 = 500
+var  so2_1 = 400
+var  co_1 = 200
+var  o3_1 = 100
+var  no2_1 = 300
+var  pressure_1 = 1008.4f
+var  temperature_1 = 29.3f
+var  wind_speed_1 = 14f
+var  wind_direction_1 = 146f
+var  humidity_1 = 86f
+var  rain_rate_1 = 4.5f
+var  solar_radiation_1 = 64f*/
 
 fun isNetworkAvailable(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -208,6 +224,11 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         val txt_stasiun_name: TextView = popup_stasiun_detail.findViewById<View>(R.id.stasiun_name) as TextView
         val txt_city: TextView = popup_stasiun_detail.findViewById<View>(R.id.city) as TextView
         val txt_province: TextView = popup_stasiun_detail.findViewById<View>(R.id.province) as TextView
+        val txt_pm10: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10) as TextView
+        val txt_so2: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2) as TextView
+        val txt_co: TextView = popup_stasiun_detail.findViewById<View>(R.id.co) as TextView
+        val txt_o3: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3) as TextView
+        val txt_no2: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2) as TextView
         val txt_pressure: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure) as TextView
         val txt_temperature: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature) as TextView
         val txt_wind_direction: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction) as TextView
@@ -215,6 +236,18 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         val txt_humidity: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity) as TextView
         val txt_rain_rate: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate) as TextView
         val txt_solar_radiation: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation) as TextView
+        /*val txt_pm10_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10_1) as TextView
+        val txt_so2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2_1) as TextView
+        val txt_co_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.co_1) as TextView
+        val txt_o3_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3_1) as TextView
+        val txt_no2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2_1) as TextView
+        val txt_pressure_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure_1) as TextView
+        val txt_temperature_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature_1) as TextView
+        val txt_wind_direction_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction_1) as TextView
+        val txt_wind_speed_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_speed_1) as TextView
+        val txt_humidity_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity_1) as TextView
+        val txt_rain_rate_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate_1) as TextView
+        val txt_solar_radiation_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation_1) as TextView*/
 
         txt_close.setOnClickListener(View.OnClickListener { popup_stasiun_detail.dismiss() })
         txt_category.setText("STATUS : " + category)
@@ -232,13 +265,30 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         txt_stasiun_name.setText(StasiunName)
         txt_city.setText(City)
         txt_province.setText(Province)
-        txt_pressure.setText(pressure)
-        txt_temperature.setText(temperature)
-        txt_wind_direction.setText(wind_direction)
-        txt_wind_speed.setText(wind_speed)
-        txt_humidity.setText(humidity)
-        txt_rain_rate.setText(rain_rate)
-        txt_solar_radiation.setText(solar_radiation)
+        txt_pm10.setText(pm10.toString())
+        txt_so2.setText(so2.toString())
+        txt_co.setText(co.toString())
+        txt_o3.setText(o3.toString())
+        txt_no2.setText(no2.toString())
+        txt_pressure.setText(pressure.toString() + "\nmBar")
+        txt_temperature.setText(temperature.toString() + "\n°C")
+        txt_wind_direction.setText(wind_direction.toString() + "°")
+        txt_wind_speed.setText(wind_speed.toString() + "\nKm/h")
+        txt_humidity.setText(humidity.toString() + "%")
+        txt_rain_rate.setText(rain_rate.toString() + "\nmm/jam")
+        txt_solar_radiation.setText(solar_radiation.toString() + "\nwatt/m2")
+        /*txt_pm10_1.setText(pm10_1.toString())
+        txt_so2_1.setText(so2_1.toString())
+        txt_co_1.setText(co_1.toString())
+        txt_o3_1.setText(o3_1.toString())
+        txt_no2_1.setText(no2_1.toString())
+        txt_pressure_1.setText(pressure_1.toString() + "\nmBar")
+        txt_temperature_1.setText(temperature_1.toString() + "\n°C")
+        txt_wind_direction_1.setText(wind_direction_1.toString() + "°")
+        txt_wind_speed_1.setText(wind_speed_1.toString() + "\nKm/h")
+        txt_humidity_1.setText(humidity_1.toString() + "%")
+        txt_rain_rate_1.setText(rain_rate_1.toString() + "\nmm/jam")
+        txt_solar_radiation_1.setText(solar_radiation_1.toString() + "\nwatt/m2")*/
 
         popup_stasiun_detail.show()
         loading.visibility = View.GONE
