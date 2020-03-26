@@ -44,6 +44,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.lang.reflect.Field
+import java.math.BigInteger
 
 var LATITUDE = ""
 var LONGITUDE = ""
@@ -215,6 +216,14 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         ShowPopup()
     }
 
+    fun getIndexBackground(ispu:Int) : Int {
+        if(ispu <= 50) return R.drawable.bgtext_baik
+        else if(ispu <= 100) return R.drawable.bgtext_sedang
+        else if(ispu <= 199) return R.drawable.bgtext_tidak_sehat
+        else if(ispu <= 299) return R.drawable.bgtext_sangat_tidak
+        else return R.drawable.bgtext_berbahaya
+    }
+
     fun ShowPopup() {
         popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
         popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -266,10 +275,15 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         txt_city.setText(City)
         txt_province.setText(Province)
         txt_pm10.setText(pm10.toString())
+        txt_pm10.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(pm10)))
         txt_so2.setText(so2.toString())
+        txt_so2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(so2)))
         txt_co.setText(co.toString())
+        txt_co.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(co)))
         txt_o3.setText(o3.toString())
+        txt_o3.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(o3)))
         txt_no2.setText(no2.toString())
+        txt_no2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(no2)))
         txt_pressure.setText(pressure.toString() + "\nmBar")
         txt_temperature.setText(temperature.toString() + "\n°C")
         txt_wind_direction.setText(wind_direction.toString() + "°")
@@ -419,23 +433,18 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_NONE))
         polyStyle.setStrokeWidth(2f)
         if(kategori == "BAIK") {
-//            polyStyle.setFillColor(getResources().getColor(R.color.BAIK))
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BAIK))
             polyStyle.setStrokeWidth(2f)
         } else if(kategori == "SEDANG") {
-//            polyStyle.setFillColor(getResources().getColor(R.color.SEDANG))
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SEDANG))
             polyStyle.setStrokeWidth(2f)
         } else if(kategori == "TIDAK_SEHAT") {
-//            polyStyle.setFillColor(getResources().getColor(R.color.TIDAK_SEHAT))
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_TIDAK_SEHAT))
             polyStyle.setStrokeWidth(2f)
         } else if(kategori == "SANGAT_TIDAK_SEHAT") {
-//            polyStyle.setFillColor(getResources().getColor(R.color.SANGAT_TIDAK_SEHAT))
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SANGAT_TIDAK_SEHAT))
             polyStyle.setStrokeWidth(2f)
         } else if(kategori == "BERBAHAYA") {
-//            polyStyle.setFillColor(getResources().getColor(R.color.BERBAHAYA))
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BERBAHAYA))
             polyStyle.setStrokeWidth(2f)
         }
@@ -464,8 +473,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
                                     markers_lng[marker_id] = ispu.getString("lng").toDouble()
                                     markers_cat[marker_id] = ispu.getString("category").toUpperCase()
                                     markers_title[marker_id] = ispu.getString("category")
-//                                    if(ispu.getString("worst_ispu").toInt() > 0)
-//                                        markers_title[marker_id] = markers_title[marker_id] + "\n\r" + ispu.getString("worst_ispu")
                                     marker_id++;
                                 }
                             }
