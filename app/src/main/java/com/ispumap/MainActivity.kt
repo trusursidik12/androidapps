@@ -22,6 +22,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.ispumap.OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
@@ -31,9 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
@@ -44,7 +43,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.lang.reflect.Field
-import java.math.BigInteger
 
 var LATITUDE = ""
 var LONGITUDE = ""
@@ -60,11 +58,11 @@ var  o3 = 400
 var  no2 = 500
 var  pressure = 1007.4f
 var  temperature = 28.3f
-var  wind_speed = 13f
-var  wind_direction = 145f
-var  humidity = 85f
+var  wind_speed = 13
+var  wind_direction = 145
+var  humidity = 85
 var  rain_rate = 4.4f
-var  solar_radiation = 63f
+var  solar_radiation = 63
 /*var  pm10_1 = 500
 var  so2_1 = 400
 var  co_1 = 200
@@ -72,11 +70,11 @@ var  o3_1 = 100
 var  no2_1 = 300
 var  pressure_1 = 1008.4f
 var  temperature_1 = 29.3f
-var  wind_speed_1 = 14f
-var  wind_direction_1 = 146f
-var  humidity_1 = 86f
+var  wind_speed_1 = 14
+var  wind_direction_1 = 146
+var  humidity_1 = 86
 var  rain_rate_1 = 4.5f
-var  solar_radiation_1 = 64f*/
+var  solar_radiation_1 = 64*/
 
 fun isNetworkAvailable(context: Context): Boolean {
     val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -118,15 +116,18 @@ fun GET(context: Context,url: String, callback: Callback): Call {
     return call
 }
 
-class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,OnMapReadyCallback {
+class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener,OnMapReadyCallback {
     private var mGoogleApiClient: GoogleApiClient? = null
     private var mLocation: Location? = null
-    private var GMap: GoogleMap? = null
+    private lateinit var GMap: GoogleMap
+    private lateinit var mapFragment : SupportMapFragment
     private var locationManager: LocationManager? = null
     private var mLocationManager: LocationManager? = null
     private var mLocationRequest: LocationRequest? = null
+    private var isMapReady: Boolean = false
     private var focusing: Boolean = false
     private var reloadlayer: Boolean = false
+    private var isShowDetailStasiun: Boolean = false
     private var zoomview = 5f
     private var back_clicked = 0
     private var markers_lat = Array<Double>(1000,{0.0})
@@ -156,16 +157,34 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         false
     }
     private lateinit var popup_stasiun_detail: Dialog
+    private var selectedMarker: Marker? = null
+
+
+    private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
+        override fun onMarkerClick(marker: Marker?): Boolean {
+            loading.visibility = View.VISIBLE
+            isShowDetailStasiun = false
+            LoadShowDetailStasiun()
+            GET(this@MainActivity,"aqmdetailstasiun?trusur_api_key={trusur_api_key}&lat=" + marker!!.position.latitude + "&lon=" + marker!!.position.longitude, object: Callback {
+                override fun onResponse(call: Call?, response: Response) {
+                    isShowDetailStasiun = true
+                }
+                override fun onFailure(call: Call?, e: IOException?) {}
+            })
+            return false
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        loadLayers()
         setContentView(R.layout.activity_main)
         popup_stasiun_detail = Dialog(this@MainActivity);
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
-        mapFragment!!.getMapAsync(this)
+
         if (isNetworkAvailable(this@MainActivity)) {
             readVersion(this@MainActivity)
         } else {
@@ -213,7 +232,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         mLocationManager = this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         isGPSon()
         if (mGoogleApiClient != null) mGoogleApiClient!!.connect()
-        ShowPopup()
     }
 
     fun getIndexBackground(ispu:Int) : Int {
@@ -224,7 +242,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         else return R.drawable.bgtext_berbahaya
     }
 
-    fun ShowPopup() {
+    fun ShowDetailStasiun() {
         popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
         popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val txt_close: TextView = popup_stasiun_detail.findViewById<View>(R.id.close) as TextView
@@ -308,7 +326,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         loading.visibility = View.GONE
     }
 
-
     @SuppressLint("MissingPermission")
     override fun onConnected(p0: Bundle?) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -357,8 +374,10 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         LONGITUDE = java.lang.Double.toString(location.longitude)
         if(!focusing) {
             val coordinate = LatLng(LATITUDE.toDouble(), LONGITUDE.toDouble())
-            GMap!!.moveCamera(CameraUpdateFactory.newLatLng(coordinate))
-            focusing = true
+            if(isMapReady){
+                GMap.moveCamera(CameraUpdateFactory.newLatLng(coordinate))
+                focusing = true
+            }
         }
     }
 
@@ -422,7 +441,7 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         iconFactory.setColor(color)
         iconFactory.setTextAppearance(R.style.MarkerTitle);
         val markerOptions = MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(title))).position(LatLng(lat, lng)).anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()).title(title)
-        GMap!!.addMarker(markerOptions)
+        GMap.addMarker(markerOptions)
     }
 
     fun drawPolygon(geojson_file: Int,kategori: String = "NONE"){
@@ -451,7 +470,6 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
     }
 
     fun loadLayers(){
-        GMap!!.clear();
         val f: Array<Field> = R.raw::class.java.getFields()
         var request_id = 0
         var marker_id = 0
@@ -487,12 +505,26 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
         getReadyReloadLayer()
     }
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        googleMap.uiSettings.setAllGesturesEnabled(true)
-        googleMap.getUiSettings().setZoomControlsEnabled(true)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.toDouble(), 0.toDouble()),zoomview))
-        GMap = googleMap
-        loadLayers()
+    override fun onMapReady(googleMap: GoogleMap?) {
+        isMapReady = true
+        GMap = googleMap ?: return
+        with(GMap) {
+            uiSettings.setAllGesturesEnabled(true)
+            uiSettings.isZoomControlsEnabled = false
+            moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.toDouble(), 0.toDouble()),zoomview))
+            setOnMarkerClickListener(markerClickListener)
+            setOnMapClickListener { selectedMarker = null }
+            markers_lat.forEachIndexed { index, lat ->
+                if(markers_title[index] != "")
+                    drawMarker(lat,markers_lng[index],markers_title[index],markers_cat[index])
+            }
+        }
+        /*provinces.forEachIndexed { index, province ->
+            if(province > 0) {
+                drawPolygon(province, categories[index])
+            }
+        }*/
+        loading.visibility = View.GONE
     }
 
     override fun onBackPressed() {
@@ -505,22 +537,19 @@ class MainActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks, G
             Toast.makeText(this@MainActivity,"Tekan \"kembali\" sekali lagi untuk keluar dari aplikasi ini", Toast.LENGTH_SHORT).show()
     }
 
+    fun LoadShowDetailStasiun() {
+        if(!isShowDetailStasiun) Handler().postDelayed({LoadShowDetailStasiun()}, 500)
+        else ShowDetailStasiun()
+    }
+
     fun getReadyReloadLayer(){
         Handler().postDelayed({
             if(!reloadlayer) {
                 reloadlayer = true
                 Handler().postDelayed({getReadyReloadLayer()}, 500)
             }else{
-                provinces.forEachIndexed { index, province ->
-                    if(province > 0) {
-                        drawPolygon(province, categories[index])
-                    }
-                }
-                markers_lat.forEachIndexed { index, lat ->
-                    if(markers_title[index] != "")
-                        drawMarker(lat,markers_lng[index],markers_title[index],markers_cat[index])
-                }
-                loading.visibility = View.GONE
+                mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+                OnMapAndViewReadyListener(mapFragment, this)
             }
         }, 500)
     }
