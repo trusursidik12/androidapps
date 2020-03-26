@@ -47,22 +47,22 @@ import java.lang.reflect.Field
 var LATITUDE = ""
 var LONGITUDE = ""
 var client = OkHttpClient()
-var  category = "SEDANG"
-var  StasiunName = "Ciwandan"
-var  City = "Cilegon"
-var  Province = "Banten"
-var  pm10 = 100
-var  so2 = 200
-var  co = 300
-var  o3 = 400
-var  no2 = 500
-var  pressure = 1007.4f
-var  temperature = 28.3f
-var  wind_speed = 13
-var  wind_direction = 145
-var  humidity = 85
-var  rain_rate = 4.4f
-var  solar_radiation = 63
+var  category = ""
+var  StasiunName = ""
+var  City = ""
+var  Province = ""
+var  pm10 = 0
+var  so2 = 0
+var  co = 0
+var  o3 = 0
+var  no2 = 0
+var  pressure = 0.0f
+var  temperature = 0.0f
+var  wind_speed = 0
+var  wind_direction = 0
+var  humidity = 0
+var  rain_rate = 0.0f
+var  solar_radiation = 0
 /*var  pm10_1 = 500
 var  so2_1 = 400
 var  co_1 = 200
@@ -120,6 +120,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     private var mGoogleApiClient: GoogleApiClient? = null
     private var mLocation: Location? = null
     private lateinit var GMap: GoogleMap
+    private lateinit var GMap2: GoogleMap
     private lateinit var mapFragment : SupportMapFragment
     private var locationManager: LocationManager? = null
     private var mLocationManager: LocationManager? = null
@@ -164,9 +165,44 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         override fun onMarkerClick(marker: Marker?): Boolean {
             loading.visibility = View.VISIBLE
             isShowDetailStasiun = false
+            category = ""
+            StasiunName = ""
+            City = ""
+            Province = ""
+            pm10 = 0
+            so2 = 0
+            co = 0
+            o3 = 0
+            no2 = 0
+            pressure = 0.0f
+            temperature = 0.0f
+            wind_speed = 0
+            wind_direction = 0
+            humidity = 0
+            rain_rate = 0.0f
+            solar_radiation = 0
             LoadShowDetailStasiun()
             GET(this@MainActivity,"aqmdetailstasiun?trusur_api_key={trusur_api_key}&lat=" + marker!!.position.latitude + "&lon=" + marker!!.position.longitude, object: Callback {
                 override fun onResponse(call: Call?, response: Response) {
+                    val responseData = JSONObject(response.body()?.string())
+                    if (responseData.getString("status") == "true") {
+                        category = responseData.getString("category")
+                        StasiunName = responseData.getString("stasiun_name")
+                        City = responseData.getString("city")
+                        Province = responseData.getString("province")
+                        pm10 = responseData.getString("pm10").toInt()
+                        so2 = responseData.getString("so2").toInt()
+                        co = responseData.getString("co").toInt()
+                        o3 = responseData.getString("o3").toInt()
+                        no2 = responseData.getString("no2").toInt()
+                        pressure = responseData.getString("pressure").toFloat()
+                        temperature = responseData.getString("temperature").toFloat()
+                        wind_speed = responseData.getString("wind_speed").toInt()
+                        wind_direction = responseData.getString("wind_direction").toInt()
+                        humidity = responseData.getString("humidity").toInt()
+                        rain_rate = responseData.getString("rain_rate").toFloat()
+                        solar_radiation = responseData.getString("solar_radiation").toInt()
+                    }
                     isShowDetailStasiun = true
                 }
                 override fun onFailure(call: Call?, e: IOException?) {}
@@ -243,86 +279,88 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     }
 
     fun ShowDetailStasiun() {
-        popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
-        popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        val txt_close: TextView = popup_stasiun_detail.findViewById<View>(R.id.close) as TextView
-        val ic_emoticon: ImageView = popup_stasiun_detail.findViewById<View>(R.id.emoticon) as ImageView
-        val txt_category: TextView = popup_stasiun_detail.findViewById<View>(R.id.category) as TextView
-        val txt_stasiun_name: TextView = popup_stasiun_detail.findViewById<View>(R.id.stasiun_name) as TextView
-        val txt_city: TextView = popup_stasiun_detail.findViewById<View>(R.id.city) as TextView
-        val txt_province: TextView = popup_stasiun_detail.findViewById<View>(R.id.province) as TextView
-        val txt_pm10: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10) as TextView
-        val txt_so2: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2) as TextView
-        val txt_co: TextView = popup_stasiun_detail.findViewById<View>(R.id.co) as TextView
-        val txt_o3: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3) as TextView
-        val txt_no2: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2) as TextView
-        val txt_pressure: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure) as TextView
-        val txt_temperature: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature) as TextView
-        val txt_wind_direction: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction) as TextView
-        val txt_wind_speed: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_speed) as TextView
-        val txt_humidity: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity) as TextView
-        val txt_rain_rate: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate) as TextView
-        val txt_solar_radiation: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation) as TextView
-        /*val txt_pm10_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10_1) as TextView
-        val txt_so2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2_1) as TextView
-        val txt_co_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.co_1) as TextView
-        val txt_o3_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3_1) as TextView
-        val txt_no2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2_1) as TextView
-        val txt_pressure_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure_1) as TextView
-        val txt_temperature_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature_1) as TextView
-        val txt_wind_direction_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction_1) as TextView
-        val txt_wind_speed_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_speed_1) as TextView
-        val txt_humidity_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity_1) as TextView
-        val txt_rain_rate_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate_1) as TextView
-        val txt_solar_radiation_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation_1) as TextView*/
+        if(category != ""){
+            popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
+            popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            val txt_close: TextView = popup_stasiun_detail.findViewById<View>(R.id.close) as TextView
+            val ic_emoticon: ImageView = popup_stasiun_detail.findViewById<View>(R.id.emoticon) as ImageView
+            val txt_category: TextView = popup_stasiun_detail.findViewById<View>(R.id.category) as TextView
+            val txt_stasiun_name: TextView = popup_stasiun_detail.findViewById<View>(R.id.stasiun_name) as TextView
+            val txt_city: TextView = popup_stasiun_detail.findViewById<View>(R.id.city) as TextView
+            val txt_province: TextView = popup_stasiun_detail.findViewById<View>(R.id.province) as TextView
+            val txt_pm10: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10) as TextView
+            val txt_so2: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2) as TextView
+            val txt_co: TextView = popup_stasiun_detail.findViewById<View>(R.id.co) as TextView
+            val txt_o3: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3) as TextView
+            val txt_no2: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2) as TextView
+            val txt_pressure: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure) as TextView
+            val txt_temperature: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature) as TextView
+            val txt_wind_direction: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction) as TextView
+            val txt_wind_speed: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_speed) as TextView
+            val txt_humidity: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity) as TextView
+            val txt_rain_rate: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate) as TextView
+            val txt_solar_radiation: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation) as TextView
+            /*val txt_pm10_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pm10_1) as TextView
+            val txt_so2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.so2_1) as TextView
+            val txt_co_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.co_1) as TextView
+            val txt_o3_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.o3_1) as TextView
+            val txt_no2_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.no2_1) as TextView
+            val txt_pressure_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.pressure_1) as TextView
+            val txt_temperature_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.temperature_1) as TextView
+            val txt_wind_direction_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_direction_1) as TextView
+            val txt_wind_speed_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.wind_speed_1) as TextView
+            val txt_humidity_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.humidity_1) as TextView
+            val txt_rain_rate_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.rain_rate_1) as TextView
+            val txt_solar_radiation_1: TextView = popup_stasiun_detail.findViewById<View>(R.id.solar_radiation_1) as TextView*/
 
-        txt_close.setOnClickListener(View.OnClickListener { popup_stasiun_detail.dismiss() })
-        txt_category.setText("STATUS : " + category)
-        if(category == "BAIK"){
-            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_baik))
-        } else if(category == "SEDANG"){
-            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sedang))
-        } else if(category == "TIDAK_SEHAT") {
-            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_tidak_sehat))
-        } else if(category == "SANGAT_TIDAK_SEHAT") {
-            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sangat_tidak))
-        } else if(category == "BERBAHAYA") {
-            ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_berbahaya))
+            txt_close.setOnClickListener(View.OnClickListener { popup_stasiun_detail.dismiss() })
+            txt_category.setText("STATUS : " + category)
+            if(category == "BAIK"){
+                ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_baik))
+            } else if(category == "SEDANG"){
+                ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sedang))
+            } else if(category == "TIDAK_SEHAT") {
+                ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_tidak_sehat))
+            } else if(category == "SANGAT_TIDAK_SEHAT") {
+                ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_sangat_tidak))
+            } else if(category == "BERBAHAYA") {
+                ic_emoticon.setImageDrawable(getResources().getDrawable(R.drawable.ic_emote_berbahaya))
+            }
+            txt_stasiun_name.setText(StasiunName)
+            txt_city.setText(City)
+            txt_province.setText(Province)
+            txt_pm10.setText(pm10.toString())
+            txt_pm10.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(pm10)))
+            txt_so2.setText(so2.toString())
+            txt_so2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(so2)))
+            txt_co.setText(co.toString())
+            txt_co.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(co)))
+            txt_o3.setText(o3.toString())
+            txt_o3.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(o3)))
+            txt_no2.setText(no2.toString())
+            txt_no2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(no2)))
+            txt_pressure.setText(pressure.toString() + "\nmBar")
+            txt_temperature.setText(temperature.toString() + "\n°C")
+            txt_wind_direction.setText(wind_direction.toString() + "°")
+            txt_wind_speed.setText(wind_speed.toString() + "\nKm/h")
+            txt_humidity.setText(humidity.toString() + "%")
+            txt_rain_rate.setText(rain_rate.toString() + "\nmm/jam")
+            txt_solar_radiation.setText(solar_radiation.toString() + "\nwatt/m2")
+            /*txt_pm10_1.setText(pm10_1.toString())
+            txt_so2_1.setText(so2_1.toString())
+            txt_co_1.setText(co_1.toString())
+            txt_o3_1.setText(o3_1.toString())
+            txt_no2_1.setText(no2_1.toString())
+            txt_pressure_1.setText(pressure_1.toString() + "\nmBar")
+            txt_temperature_1.setText(temperature_1.toString() + "\n°C")
+            txt_wind_direction_1.setText(wind_direction_1.toString() + "°")
+            txt_wind_speed_1.setText(wind_speed_1.toString() + "\nKm/h")
+            txt_humidity_1.setText(humidity_1.toString() + "%")
+            txt_rain_rate_1.setText(rain_rate_1.toString() + "\nmm/jam")
+            txt_solar_radiation_1.setText(solar_radiation_1.toString() + "\nwatt/m2")*/
+
+            popup_stasiun_detail.show()
         }
-        txt_stasiun_name.setText(StasiunName)
-        txt_city.setText(City)
-        txt_province.setText(Province)
-        txt_pm10.setText(pm10.toString())
-        txt_pm10.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(pm10)))
-        txt_so2.setText(so2.toString())
-        txt_so2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(so2)))
-        txt_co.setText(co.toString())
-        txt_co.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(co)))
-        txt_o3.setText(o3.toString())
-        txt_o3.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(o3)))
-        txt_no2.setText(no2.toString())
-        txt_no2.setBackgroundDrawable(getResources().getDrawable(getIndexBackground(no2)))
-        txt_pressure.setText(pressure.toString() + "\nmBar")
-        txt_temperature.setText(temperature.toString() + "\n°C")
-        txt_wind_direction.setText(wind_direction.toString() + "°")
-        txt_wind_speed.setText(wind_speed.toString() + "\nKm/h")
-        txt_humidity.setText(humidity.toString() + "%")
-        txt_rain_rate.setText(rain_rate.toString() + "\nmm/jam")
-        txt_solar_radiation.setText(solar_radiation.toString() + "\nwatt/m2")
-        /*txt_pm10_1.setText(pm10_1.toString())
-        txt_so2_1.setText(so2_1.toString())
-        txt_co_1.setText(co_1.toString())
-        txt_o3_1.setText(o3_1.toString())
-        txt_no2_1.setText(no2_1.toString())
-        txt_pressure_1.setText(pressure_1.toString() + "\nmBar")
-        txt_temperature_1.setText(temperature_1.toString() + "\n°C")
-        txt_wind_direction_1.setText(wind_direction_1.toString() + "°")
-        txt_wind_speed_1.setText(wind_speed_1.toString() + "\nKm/h")
-        txt_humidity_1.setText(humidity_1.toString() + "%")
-        txt_rain_rate_1.setText(rain_rate_1.toString() + "\nmm/jam")
-        txt_solar_radiation_1.setText(solar_radiation_1.toString() + "\nwatt/m2")*/
-
-        popup_stasiun_detail.show()
         loading.visibility = View.GONE
     }
 
@@ -445,12 +483,9 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     }
 
     fun drawPolygon(geojson_file: Int,kategori: String = "NONE"){
-        val layer = GeoJsonLayer(GMap, geojson_file,applicationContext)
+        val layer = GeoJsonLayer(GMap2, geojson_file,this@MainActivity)
         layer.addLayerToMap()
         var polyStyle: GeoJsonPolygonStyle = layer.defaultPolygonStyle
-        polyStyle.setFillColor(getResources().getColor(R.color.NONE))
-        polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_NONE))
-        polyStyle.setStrokeWidth(2f)
         if(kategori == "BAIK") {
             polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BAIK))
             polyStyle.setStrokeWidth(2f)
@@ -508,6 +543,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     override fun onMapReady(googleMap: GoogleMap?) {
         isMapReady = true
         GMap = googleMap ?: return
+        GMap2 = GMap
         with(GMap) {
             uiSettings.setAllGesturesEnabled(true)
             uiSettings.isZoomControlsEnabled = false
@@ -519,11 +555,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
                     drawMarker(lat,markers_lng[index],markers_title[index],markers_cat[index])
             }
         }
-        /*provinces.forEachIndexed { index, province ->
-            if(province > 0) {
-                drawPolygon(province, categories[index])
-            }
-        }*/
+//        provinces.forEachIndexed { index, province -> if(province > 0) drawPolygon(province, categories[index]) }
         loading.visibility = View.GONE
     }
 
