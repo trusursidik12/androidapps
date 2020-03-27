@@ -40,14 +40,11 @@ class CitiesActivity : AppCompatActivity() {
 
     private fun setupViewPager() {
         val adapter = CitiesFragmentPagerAdapter(getSupportFragmentManager())
-        var firstFragmet: MyFrament = MyFrament.newInstance("First Fragment")
-        var secondFragmet: MyFrament = MyFrament.newInstance("Second Fragment")
-        var thirdFragmet: MyFrament = MyFrament.newInstance("Third Fragment")
-
-        adapter.addFragment(firstFragmet, "ONE")
-        adapter.addFragment(secondFragmet, "TWO")
-        adapter.addFragment(thirdFragmet, "THREE")
-
+        val names = listOf("Anne", "Peter", "Jeff")
+        for (name in names) {
+            var firstFragmet: MyFrament = MyFrament.newInstance(name)
+            adapter.addFragment(firstFragmet, name)
+        }
         viewpager!!.adapter = adapter
     }
 }
