@@ -152,7 +152,8 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
                 recreate()
             }
             R.id.nav_city_detail -> {
-                Toast.makeText(this@MainActivity,"nav_city_detail", Toast.LENGTH_SHORT).show()
+                val i = Intent(this@MainActivity, CitiesActivity::class.java)
+                startActivity(i)
             }
         }
         false
@@ -218,6 +219,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         setContentView(R.layout.activity_main)
         popup_stasiun_detail = Dialog(this@MainActivity);
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        bottom_navigation.setItemIconTintList(null)
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
 
