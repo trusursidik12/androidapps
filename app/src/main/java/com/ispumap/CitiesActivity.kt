@@ -92,7 +92,7 @@ class CitiesActivity : AppCompatActivity() {
                         humidity = ispu.getString("humidity").toInt()
                         rain_rate = ispu.getString("rain_rate").toFloat()
                         solar_radiation = ispu.getString("solar_radiation").toInt()
-                        var Fragmet: MyFrament = MyFrament.newInstance(id_stasiun + " " + category)
+                        var Fragmet: MyFrament = MyFrament.newInstance(ispus.getString(id_stasiun))
                         adapter.addFragment(Fragmet, id_stasiun)
                     }
                 }
