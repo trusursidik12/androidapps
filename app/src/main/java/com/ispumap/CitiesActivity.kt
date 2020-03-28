@@ -22,6 +22,7 @@ import java.io.IOException
 class CitiesActivity : AppCompatActivity() {
     private lateinit var viewpager: ViewPager
     private lateinit var loading: ProgressBar
+    private lateinit var ispus : JSONObject
     private lateinit var id_stasiuns : JSONArray
     private var isShowStasiuns: Boolean = false
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -29,9 +30,6 @@ class CitiesActivity : AppCompatActivity() {
             R.id.nav_home -> {
                 val i = Intent(this@CitiesActivity, MainActivity::class.java)
                 startActivity(i)
-            }
-            R.id.nav_city_detail -> {
-                recreate()
             }
         }
         false
@@ -60,7 +58,7 @@ class CitiesActivity : AppCompatActivity() {
                 val responseData = JSONObject(response.body()?.string())
                 if (responseData.getString("status") == "true") {
                     if (responseData.getString("data") != "") {
-                        val data = JSONObject(responseData.getString("data"))
+                        ispus = JSONObject(responseData.getString("data"))
                         id_stasiuns = JSONArray(responseData.getString("id_stasiuns"))
                     }
                 }
@@ -76,26 +74,27 @@ class CitiesActivity : AppCompatActivity() {
             for (i in 0 until id_stasiuns.length()) {
                 val id_stasiun = id_stasiuns[i].toString()
                 if (id_stasiun != "") {
-                    var Fragmet: MyFrament = MyFrament.newInstance(id_stasiun)
-                    adapter.addFragment(Fragmet, id_stasiun)
-                    //if(ispu.getString("lat") != "" && ispu.getString("lng") != "") {
-                    /*category = responseData.getString("category")
-                        StasiunName = responseData.getString("stasiun_name")
-                        City = responseData.getString("city")
-                        Province = responseData.getString("province")
-                        pm10 = responseData.getString("pm10").toInt()
-                        so2 = responseData.getString("so2").toInt()
-                        co = responseData.getString("co").toInt()
-                        o3 = responseData.getString("o3").toInt()
-                        no2 = responseData.getString("no2").toInt()
-                        pressure = responseData.getString("pressure").toFloat()
-                        temperature = responseData.getString("temperature").toFloat()
-                        wind_speed = responseData.getString("wind_speed").toInt()
-                        wind_direction = responseData.getString("wind_direction").toInt()
-                        humidity = responseData.getString("humidity").toInt()
-                        rain_rate = responseData.getString("rain_rate").toFloat()
-                        solar_radiation = responseData.getString("solar_radiation").toInt()*/
-                    //}
+                    var ispu = JSONObject(ispus.getString(id_stasiun))
+                    if(ispu.getString("status") == "true") {
+                        category = ispu.getString("category")
+                        StasiunName = ispu.getString("stasiun_name")
+                        City = ispu.getString("city")
+                        Province = ispu.getString("province")
+                        pm10 = ispu.getString("pm10").toInt()
+                        so2 = ispu.getString("so2").toInt()
+                        co = ispu.getString("co").toInt()
+                        o3 = ispu.getString("o3").toInt()
+                        no2 = ispu.getString("no2").toInt()
+                        pressure = ispu.getString("pressure").toFloat()
+                        temperature = ispu.getString("temperature").toFloat()
+                        wind_speed = ispu.getString("wind_speed").toInt()
+                        wind_direction = ispu.getString("wind_direction").toInt()
+                        humidity = ispu.getString("humidity").toInt()
+                        rain_rate = ispu.getString("rain_rate").toFloat()
+                        solar_radiation = ispu.getString("solar_radiation").toInt()
+                        var Fragmet: MyFrament = MyFrament.newInstance(id_stasiun + " " + category)
+                        adapter.addFragment(Fragmet, id_stasiun)
+                    }
                 }
             }
             viewpager!!.adapter = adapter
