@@ -547,9 +547,9 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         GMap = googleMap ?: return
         GMap2 = GMap
         with(GMap) {
+            moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(-6.2653,106.7848),zoomview))
             uiSettings.setAllGesturesEnabled(true)
-            uiSettings.isZoomControlsEnabled = false
-            moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(0.toDouble(), 0.toDouble()),zoomview))
+            uiSettings.isZoomControlsEnabled = true
             setOnMarkerClickListener(markerClickListener)
             setOnMapClickListener { selectedMarker = null }
             markers_lat.forEachIndexed { index, lat ->
