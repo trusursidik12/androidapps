@@ -44,8 +44,8 @@ import org.json.JSONObject
 import java.io.IOException
 import java.lang.reflect.Field
 
-var LATITUDE = ""
-var LONGITUDE = ""
+var LATITUDE = "-6.2653"
+var LONGITUDE = "106.7848"
 var client = OkHttpClient()
 var  category = ""
 var  StasiunName = ""
@@ -153,6 +153,10 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
             }
             R.id.nav_city_detail -> {
                 val i = Intent(this@MainActivity, CitiesActivity::class.java)
+                startActivity(i)
+            }
+            R.id.nav_profile -> {
+                val i = Intent(this@MainActivity, ProfileActivity::class.java)
                 startActivity(i)
             }
         }

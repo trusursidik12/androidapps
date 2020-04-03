@@ -31,6 +31,10 @@ class CitiesActivity : AppCompatActivity() {
                 val i = Intent(this@CitiesActivity, MainActivity::class.java)
                 startActivity(i)
             }
+            R.id.nav_profile -> {
+                val i = Intent(this@CitiesActivity, ProfileActivity::class.java)
+                startActivity(i)
+            }
         }
         false
     }
@@ -105,5 +109,10 @@ class CitiesActivity : AppCompatActivity() {
     fun LoadShowStasiuns() {
         if(!isShowStasiuns) Handler().postDelayed({LoadShowStasiuns()}, 100)
         else ShowStasiuns()
+    }
+
+    override fun onBackPressed() {
+        val i = Intent(this@CitiesActivity, MainActivity::class.java)
+        startActivity(i)
     }
 }
