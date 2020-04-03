@@ -159,6 +159,13 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
                 val i = Intent(this@MainActivity, ProfileActivity::class.java)
                 startActivity(i)
             }
+            R.id.nav_news -> {
+
+            }
+            R.id.nav_dss -> {
+                val i = Intent(this@MainActivity, DssActivity::class.java)
+                startActivity(i)
+            }
         }
         false
     }

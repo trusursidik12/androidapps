@@ -96,6 +96,13 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
                 val i = Intent(this@ProfileActivity, CitiesActivity::class.java)
                 startActivity(i)
             }
+            R.id.nav_news -> {
+
+            }
+            R.id.nav_dss -> {
+                val i = Intent(this@ProfileActivity, DssActivity::class.java)
+                startActivity(i)
+            }
         }
         false
     }
