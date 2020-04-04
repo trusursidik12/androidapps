@@ -5,8 +5,6 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -33,7 +31,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.ui.IconGenerator
-import com.ispumap.fragments.MyFrament
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.Call
 import okhttp3.Callback
@@ -97,7 +94,8 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
                 startActivity(i)
             }
             R.id.nav_news -> {
-
+                val i = Intent(this@ProfileActivity, NewsActivity::class.java)
+                startActivity(i)
             }
             R.id.nav_dss -> {
                 val i = Intent(this@ProfileActivity, DssActivity::class.java)

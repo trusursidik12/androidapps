@@ -22,7 +22,8 @@ class DssActivity : AppCompatActivity(){
                 startActivity(i)
             }
             R.id.nav_news -> {
-
+                val i = Intent(this@DssActivity, NewsActivity::class.java)
+                startActivity(i)
             }
             R.id.nav_profile -> {
                 val i = Intent(this@DssActivity, ProfileActivity::class.java)

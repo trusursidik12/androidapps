@@ -36,7 +36,8 @@ class CitiesActivity : AppCompatActivity() {
                 startActivity(i)
             }
             R.id.nav_news -> {
-
+                val i = Intent(this@CitiesActivity, NewsActivity::class.java)
+                startActivity(i)
             }
             R.id.nav_dss -> {
                 val i = Intent(this@CitiesActivity, DssActivity::class.java)
