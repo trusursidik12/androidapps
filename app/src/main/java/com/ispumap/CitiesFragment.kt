@@ -1,4 +1,4 @@
-package com.ispumap.fragments
+package com.ispumap
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -8,14 +8,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import com.ispumap.*
 import org.json.JSONObject
 
 
-class MyFrament : Fragment() {
+class MyFragment : Fragment() {
     companion object {
-        fun newInstance(message: String): MyFrament {
-            val f = MyFrament()
+        fun newInstance(message: String): MyFragment {
+            val f = MyFragment()
             val bdl = Bundle(1)
             bdl.putString(EXTRA_MESSAGE, message)
             f.setArguments(bdl)
@@ -27,7 +26,7 @@ class MyFrament : Fragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    fun getIndexBackground(ispu:Int) : Int {
+    private fun getIndexBackground(ispu:Int) : Int {
         if(ispu <= 50) return R.drawable.bgtext_baik
         else if(ispu <= 100) return R.drawable.bgtext_sedang
         else if(ispu <= 199) return R.drawable.bgtext_tidak_sehat

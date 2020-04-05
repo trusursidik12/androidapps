@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import android.webkit.*
 import android.widget.ProgressBar
 import android.widget.Toast
@@ -41,6 +42,7 @@ class NewsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_news)
 
         loading = findViewById<ProgressBar>(R.id.loading)
+        loading.visibility = View.VISIBLE
 
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         bottom_navigation.getMenu().findItem(R.id.nav_news).setChecked(true)
@@ -82,6 +84,7 @@ class NewsActivity : AppCompatActivity() {
 
             override fun onPageFinished(view: WebView, url: String) {
                 super.onPageFinished(view, url)
+                loading.visibility = View.GONE
             }
         }
 

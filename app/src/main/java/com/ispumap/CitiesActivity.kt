@@ -8,15 +8,15 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.ispumap.ViewPagerAdapter.CitiesFragmentPagerAdapter
-import com.ispumap.fragments.MyFrament
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 class CitiesActivity : AppCompatActivity() {
@@ -52,6 +52,11 @@ class CitiesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_cities)
         bottom_navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
         bottom_navigation.getMenu().findItem(R.id.nav_city_detail).setChecked(true)
+        val b = OkHttpClient.Builder()
+        b.connectTimeout(120, TimeUnit.SECONDS)
+        b.readTimeout(120, TimeUnit.SECONDS)
+        b.writeTimeout(40, TimeUnit.SECONDS)
+        client = b.build();
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
         initViews()
@@ -104,7 +109,7 @@ class CitiesActivity : AppCompatActivity() {
                         humidity = ispu.getString("humidity").toInt()
                         rain_rate = ispu.getString("rain_rate").toFloat()
                         solar_radiation = ispu.getString("solar_radiation").toInt()
-                        var Fragmet: MyFrament = MyFrament.newInstance(ispus.getString(id_stasiun))
+                        var Fragmet: MyFragment = MyFragment.newInstance(ispus.getString(id_stasiun))
                         adapter.addFragment(Fragmet, id_stasiun)
                     }
                 }

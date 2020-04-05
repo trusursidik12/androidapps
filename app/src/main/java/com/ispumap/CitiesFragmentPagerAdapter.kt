@@ -1,4 +1,4 @@
-package com.ispumap.ViewPagerAdapter
+package com.ispumap
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

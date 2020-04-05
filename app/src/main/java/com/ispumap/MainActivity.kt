@@ -22,7 +22,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.ispumap.OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
@@ -32,17 +31,23 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.ui.IconGenerator
+import com.ispumap.OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
+import okhttp3.OkHttpClient.Builder
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.lang.reflect.Field
+import java.util.concurrent.TimeUnit
 
 var LATITUDE = "-6.2653"
 var LONGITUDE = "106.7848"
@@ -234,6 +239,12 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         bottom_navigation.setItemIconTintList(null)
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
+
+        val b = Builder()
+        b.connectTimeout(120,TimeUnit.SECONDS)
+        b.readTimeout(120, TimeUnit.SECONDS)
+        b.writeTimeout(40, TimeUnit.SECONDS)
+        client = b.build();
 
         if (isNetworkAvailable(this@MainActivity)) {
             readVersion(this@MainActivity)
