@@ -9,7 +9,7 @@ class SplashScreen : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
-        val txtVersion: TextView = findViewById(R.id.txtVersion) as TextView
+        val txtVersion: TextView = findViewById<TextView>(R.id.txtVersion)
         txtVersion!!.setText("V." + this.packageManager.getPackageInfo(packageName, 0).versionName)
 
         Handler().postDelayed({

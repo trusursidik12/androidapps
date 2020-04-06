@@ -240,49 +240,16 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
 
-        val b = Builder()
-        b.connectTimeout(120,TimeUnit.SECONDS)
-        b.readTimeout(120, TimeUnit.SECONDS)
-        b.writeTimeout(40, TimeUnit.SECONDS)
-        client = b.build();
+//        val b = Builder()
+//        b.connectTimeout(120,TimeUnit.SECONDS)
+//        b.readTimeout(120, TimeUnit.SECONDS)
+//        b.writeTimeout(40, TimeUnit.SECONDS)
+//        client = b.build();
 
         if (isNetworkAvailable(this@MainActivity)) {
             readVersion(this@MainActivity)
         } else {
             Toast.makeText(this@MainActivity,"Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini", Toast.LENGTH_SHORT).show()
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-                || (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED)
-        ) {
-            val permission_camera = arrayOf(
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            ActivityCompat.requestPermissions(this, permission_camera, 1)
-        }
-
-        if(areThereMockPermissionApps(this@MainActivity) && isMockSettingsON(this@MainActivity)){
-            val confirmation = AlertDialog.Builder(this@MainActivity)
-            confirmation.setTitle("Peringatan")
-            confirmation.setMessage("Perangkat Anda terdeteksi mengizinkan akses 'Mock Location', Harap matikan perizinan akses 'Mock Location' tersebut, lalu hidupkan ulang Aplikasi ini kembali.")
-            confirmation.setPositiveButton("OK"){dialog, which -> }
-            val dialog: AlertDialog = confirmation.create()
-            dialog.show()
-            dialog.setOnDismissListener {
-            }
         }
 
         mGoogleApiClient = GoogleApiClient.Builder(this)
@@ -466,7 +433,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         else true
     }
 
-    fun areThereMockPermissionApps(context: Context): Boolean {
+    /*fun areThereMockPermissionApps(context: Context): Boolean {
         var count = 0
         val pm = context.packageManager
         val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -485,7 +452,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
             } catch (t: Throwable) { }
         }
         return if (count > 0) true else false
-    }
+    }*/
 
     fun drawMarker(lat:Double,lng:Double,title:String,category:String){
         var color = getResources().getColor(R.color.NONE)

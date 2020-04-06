@@ -70,7 +70,7 @@ class CitiesActivity : AppCompatActivity() {
     private fun setupViewPager() {
         isShowStasiuns = false
         LoadShowStasiuns()
-        GET(this@CitiesActivity, "aqmCitiesinfo?trusur_api_key={trusur_api_key}&lat="+ LATITUDE + "&lng="+ LONGITUDE, object : Callback {
+        GET(this@CitiesActivity, "aqmCitiesinfo?trusur_api_key={trusur_api_key}&lat="+ LATITUDE + "&lng="+ LONGITUDE+"&limit=10", object : Callback {
             override fun onResponse(call: Call?, response: Response) {
                 val responseData = JSONObject(response.body()?.string())
                 if (responseData.getString("status") == "true") {

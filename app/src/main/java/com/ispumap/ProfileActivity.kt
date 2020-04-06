@@ -28,8 +28,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.maps.android.data.geojson.GeoJsonLayer
-import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.ui.IconGenerator
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.Call
@@ -107,7 +105,6 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
 	
 	private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
         override fun onMarkerClick(marker: Marker?): Boolean {
-            //loading.visibility = View.VISIBLE
             return false
         }
     }
@@ -146,39 +143,6 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
             readVersion(this@ProfileActivity)
         } else {
             Toast.makeText(this@ProfileActivity,"Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini", Toast.LENGTH_SHORT).show()
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
-                || (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED)
-        ) {
-            val permission_camera = arrayOf(
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                    android.Manifest.permission.CAMERA,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            ActivityCompat.requestPermissions(this, permission_camera, 1)
-        }
-
-        if(areThereMockPermissionApps(this@ProfileActivity) && isMockSettingsON(this@ProfileActivity)){
-            val confirmation = AlertDialog.Builder(this@ProfileActivity)
-            confirmation.setTitle("Peringatan")
-            confirmation.setMessage("Perangkat Anda terdeteksi mengizinkan akses 'Mock Location', Harap matikan perizinan akses 'Mock Location' tersebut, lalu hidupkan ulang Aplikasi ini kembali.")
-            confirmation.setPositiveButton("OK"){dialog, which -> }
-            val dialog: AlertDialog = confirmation.create()
-            dialog.show()
-            dialog.setOnDismissListener {
-            }
         }
 
         mGoogleApiClient = GoogleApiClient.Builder(this)
@@ -273,32 +237,6 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
         dialog.show()
     }
 
-    fun isMockSettingsON(context: Context): Boolean {
-        return if(Settings.Secure.getString( context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION ).equals("0")) false
-        else true
-    }
-
-    fun areThereMockPermissionApps(context: Context): Boolean {
-        var count = 0
-        val pm = context.packageManager
-        val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-        for (applicationInfo in packages) {
-            try {
-                val packageInfo = pm.getPackageInfo(
-                        applicationInfo.packageName,
-                        PackageManager.GET_PERMISSIONS
-                )
-                val requestedPermissions = packageInfo.requestedPermissions
-                if (requestedPermissions != null) {
-                    for (i in requestedPermissions.indices) {
-                        if (requestedPermissions[i] == "android.permission.ACCESS_MOCK_LOCATION" && applicationInfo.packageName != context.packageName) count++
-                    }
-                }
-            } catch (t: Throwable) { }
-        }
-        return if (count > 0) true else false
-    }
-
     fun drawMarker(lat:Double,lng:Double,title:String,category:String){
         var color = getResources().getColor(R.color.NONE)
         if(category == "BAIK") {
@@ -317,28 +255,6 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
         iconFactory.setTextAppearance(R.style.MarkerTitle);
         val markerOptions = MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(title))).position(LatLng(lat, lng)).anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()).title(title)
         GMap.addMarker(markerOptions)
-    }
-
-    fun drawPolygon(geojson_file: Int,kategori: String = "NONE"){
-        val layer = GeoJsonLayer(GMap, geojson_file,this@ProfileActivity)
-        layer.addLayerToMap()
-        var polyStyle: GeoJsonPolygonStyle = layer.defaultPolygonStyle
-        if(kategori == "BAIK") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BAIK))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "SEDANG") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SEDANG))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "TIDAK_SEHAT") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_TIDAK_SEHAT))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "SANGAT_TIDAK_SEHAT") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SANGAT_TIDAK_SEHAT))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "BERBAHAYA") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BERBAHAYA))
-            polyStyle.setStrokeWidth(2f)
-        }
     }
 
     fun load_data(){
