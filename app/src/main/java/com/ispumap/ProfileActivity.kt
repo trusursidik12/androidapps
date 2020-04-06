@@ -261,7 +261,7 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
         loading.visibility = View.VISIBLE
         isShowDetail = false
         LoadShowDetail()
-        GET(this@ProfileActivity, "aqmCitiesinfo?trusur_api_key={trusur_api_key}&lat="+ LATITUDE + "&lng="+ LONGITUDE + "&limit=1", object : Callback {
+        get(this@ProfileActivity, "aqmCitiesinfo?trusur_api_key={trusur_api_key}&lat="+ LATITUDE + "&lng="+ LONGITUDE + "&limit=1", object : Callback {
             override fun onResponse(call: Call?, response: Response) {
                 val responseData = JSONObject(response.body()?.string())
                 if (responseData.getString("status") == "true") {

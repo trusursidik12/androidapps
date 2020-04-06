@@ -23,6 +23,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.LocationRequest
@@ -36,18 +37,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.maps.android.data.geojson.GeoJsonLayer
-import com.google.maps.android.data.geojson.GeoJsonPolygonStyle
 import com.google.maps.android.ui.IconGenerator
 import com.ispumap.OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
-import okhttp3.OkHttpClient.Builder
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.lang.reflect.Field
-import java.util.concurrent.TimeUnit
 
 var LATITUDE = "-6.2653"
 var LONGITUDE = "106.7848"
@@ -110,7 +107,7 @@ fun readVersion(context: Context){
     })
 }
 
-fun GET(context: Context,url: String, callback: Callback): Call {
+fun get(context: Context,url: String, callback: Callback): Call {
     val credentials: String = Credentials.basic("admin", "cHQudHJ1c3VydW5nZ3VsdGVrbnVzYQ==")
     val request = Request.Builder()
             .url(context.getResources().getString(R.string.API_HOST) + url.replace("{trusur_api_key}",context.getResources().getString(R.string.trusur_api_key)))
@@ -199,8 +196,8 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
             humidity = 0
             rain_rate = 0.0f
             solar_radiation = 0
-            LoadShowDetailStasiun()
-            GET(this@MainActivity,"aqmdetailstasiun?trusur_api_key={trusur_api_key}&lat=" + marker!!.position.latitude + "&lon=" + marker!!.position.longitude, object: Callback {
+            loadShowDetailStasiun()
+            get(this@MainActivity,"aqmdetailstasiun?trusur_api_key={trusur_api_key}&lat=" + marker!!.position.latitude + "&lon=" + marker!!.position.longitude, object: Callback {
                 override fun onResponse(call: Call?, response: Response) {
                     val responseData = JSONObject(response.body()?.string())
                     if (responseData.getString("status") == "true") {
@@ -262,7 +259,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         if (mGoogleApiClient != null) mGoogleApiClient!!.connect()
     }
 
-    fun getIndexBackground(ispu:Int) : Int {
+    private fun getIndexBackground(ispu:Int) : Int {
         if(ispu <= 50) return R.drawable.bgtext_baik
         else if(ispu <= 100) return R.drawable.bgtext_sedang
         else if(ispu <= 199) return R.drawable.bgtext_tidak_sehat
@@ -270,7 +267,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         else return R.drawable.bgtext_berbahaya
     }
 
-    fun ShowDetailStasiun() {
+    private fun showDetailStasiun() {
         if(category != ""){
             popup_stasiun_detail.setContentView(R.layout.popup_stasiun_detail)
             popup_stasiun_detail.window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -358,13 +355,22 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
 
     @SuppressLint("MissingPermission")
     override fun onConnected(p0: Bundle?) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
             ActivityCompat.requestPermissions(this, permissions,0)
+        } else {
+            startLocationUpdates()
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient)
+            if (mLocation == null) startLocationUpdates()
         }
-        startLocationUpdates()
-        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient)
-        if (mLocation == null) startLocationUpdates()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if(requestCode == 0){
+            startLocationUpdates()
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient)
+            if (mLocation == null) startLocationUpdates()
+        }
     }
 
     override fun onConnectionSuspended(i: Int) {
@@ -387,16 +393,12 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     }
 
     @SuppressLint("MissingPermission")
-    protected fun startLocationUpdates() {
+    private fun startLocationUpdates() {
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(UPDATE_INTERVAL)
                 .setFastestInterval(UPDATE_INTERVAL)
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-            ActivityCompat.requestPermissions(this, permissions,0)
-        }
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mLocationRequest, this)
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this)
     }
 
     override fun onLocationChanged(location: Location) {
@@ -412,11 +414,11 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     }
 
     private fun isGPSon(): Boolean {
-        if (!isLocationEnabled) showAlert_GPSisOff()
+        if (!isLocationEnabled) showAlertGPSisOff()
         return isLocationEnabled
     }
 
-    private fun showAlert_GPSisOff() {
+    private fun showAlertGPSisOff() {
         val dialog = AlertDialog.Builder(this)
         dialog.setTitle("Enable Location")
                 .setMessage("Setingan lokasi pada perangkat Anda sedang dimatikan.\nSilakan aktifkan setingan lokasi untuk " + "menggunakan aplikasi ini")
@@ -428,10 +430,10 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         dialog.show()
     }
 
-    fun isMockSettingsON(context: Context): Boolean {
-        return if(Settings.Secure.getString( context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION ).equals("0")) false
-        else true
-    }
+//    fun isMockSettingsON(context: Context): Boolean {
+//        return if(Settings.Secure.getString( context.getContentResolver(), Settings.Secure.ALLOW_MOCK_LOCATION ).equals("0")) false
+//        else true
+//    }
 
     /*fun areThereMockPermissionApps(context: Context): Boolean {
         var count = 0
@@ -474,35 +476,35 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         GMap.addMarker(markerOptions)
     }
 
-    fun drawPolygon(geojson_file: Int,kategori: String = "NONE"){
-        val layer = GeoJsonLayer(GMap2, geojson_file,this@MainActivity)
-        layer.addLayerToMap()
-        var polyStyle: GeoJsonPolygonStyle = layer.defaultPolygonStyle
-        if(kategori == "BAIK") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BAIK))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "SEDANG") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SEDANG))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "TIDAK_SEHAT") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_TIDAK_SEHAT))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "SANGAT_TIDAK_SEHAT") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SANGAT_TIDAK_SEHAT))
-            polyStyle.setStrokeWidth(2f)
-        } else if(kategori == "BERBAHAYA") {
-            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BERBAHAYA))
-            polyStyle.setStrokeWidth(2f)
-        }
-    }
+//    fun drawPolygon(geojson_file: Int,kategori: String = "NONE"){
+//        val layer = GeoJsonLayer(GMap2, geojson_file,this@MainActivity)
+//        layer.addLayerToMap()
+//        var polyStyle: GeoJsonPolygonStyle = layer.defaultPolygonStyle
+//        if(kategori == "BAIK") {
+//            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BAIK))
+//            polyStyle.setStrokeWidth(2f)
+//        } else if(kategori == "SEDANG") {
+//            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SEDANG))
+//            polyStyle.setStrokeWidth(2f)
+//        } else if(kategori == "TIDAK_SEHAT") {
+//            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_TIDAK_SEHAT))
+//            polyStyle.setStrokeWidth(2f)
+//        } else if(kategori == "SANGAT_TIDAK_SEHAT") {
+//            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_SANGAT_TIDAK_SEHAT))
+//            polyStyle.setStrokeWidth(2f)
+//        } else if(kategori == "BERBAHAYA") {
+//            polyStyle.setStrokeColor(getResources().getColor(R.color.STROKE_BERBAHAYA))
+//            polyStyle.setStrokeWidth(2f)
+//        }
+//    }
 
-    fun loadLayers(){
+    private fun loadLayers(){
         val f: Array<Field> = R.raw::class.java.getFields()
         var request_id = 0
         var marker_id = 0
         for (province in f) {
             provinces[request_id] = province.getInt(null)
-            GET(this@MainActivity,"aqmprovince?trusur_api_key={trusur_api_key}&provinsi=" + province.name.replace("_","%20") + "&request_id=" + request_id, object: Callback {
+            get(this@MainActivity,"aqmprovince?trusur_api_key={trusur_api_key}&provinsi=" + province.name.replace("_","%20") + "&request_id=" + request_id, object: Callback {
                 override fun onResponse(call: Call?, response: Response) {
                     val responseData = JSONObject(response.body()?.string())
                     if (responseData.getString("status") == "true") {
@@ -537,7 +539,7 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         GMap = googleMap ?: return
         GMap2 = GMap
         with(GMap) {
-            moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(-6.2653,106.7848),zoomview))
+            moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(LATITUDE.toDouble(), LONGITUDE.toDouble()),zoomview))
             uiSettings.setAllGesturesEnabled(true)
             uiSettings.isZoomControlsEnabled = true
             setOnMarkerClickListener(markerClickListener)
@@ -561,12 +563,12 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
             Toast.makeText(this@MainActivity,"Tekan \"kembali\" sekali lagi untuk keluar dari aplikasi ini", Toast.LENGTH_SHORT).show()
     }
 
-    fun LoadShowDetailStasiun() {
-        if(!isShowDetailStasiun) Handler().postDelayed({LoadShowDetailStasiun()}, 500)
-        else ShowDetailStasiun()
+    fun loadShowDetailStasiun() {
+        if(!isShowDetailStasiun) Handler().postDelayed({loadShowDetailStasiun()}, 500)
+        else showDetailStasiun()
     }
 
-    fun getReadyReloadLayer(){
+    private fun getReadyReloadLayer(){
         Handler().postDelayed({
             if(!reloadlayer) {
                 reloadlayer = true
