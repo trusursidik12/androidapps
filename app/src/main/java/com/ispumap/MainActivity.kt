@@ -65,6 +65,7 @@ var  wind_direction = 0
 var  humidity = 0
 var  rain_rate = 0.0f
 var  solar_radiation = 0
+var toastMessage = ""
 /*var  pm10_1 = 500
 var  so2_1 = 400
 var  co_1 = 200
@@ -83,28 +84,6 @@ fun isNetworkAvailable(context: Context): Boolean {
     var activeNetworkInfo: NetworkInfo? = null
     activeNetworkInfo = cm.activeNetworkInfo
     return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting
-}
-
-fun readVersion(context: Context){
-    val url = context.getResources().getString(R.string.API_HOST) + "../get_version.php"
-    val client = OkHttpClient()
-    val request = Request.Builder().url(url).build()
-    client.newCall(request).enqueue(object : Callback {
-        override fun onFailure(call: Call, e: IOException) {
-            e.printStackTrace()
-        }
-        @Throws(IOException::class)
-        override fun onResponse(call: Call, response: Response) {
-            if (response.isSuccessful) {
-                val getVersion = response.body()!!.string().toLong()
-                if (getVersion  > context.packageManager.getPackageInfo("com.ispumap", 0).versionCode) {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse("https://play.google.com/store/apps/details?id=com.ispumap")
-                    context.startActivity(intent)
-                }
-            }
-        }
-    })
 }
 
 fun get(context: Context,url: String, callback: Callback): Call {
@@ -175,7 +154,6 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     private lateinit var popup_stasiun_detail: Dialog
     private var selectedMarker: Marker? = null
 
-
     private val markerClickListener = object : GoogleMap.OnMarkerClickListener {
         override fun onMarkerClick(marker: Marker?): Boolean {
             loading.visibility = View.VISIBLE
@@ -226,6 +204,31 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         }
     }
 
+    private fun readVersion(){
+        toastShow()
+        get(this@MainActivity,"aqmappsversion?trusur_api_key={trusur_api_key}", object: Callback {
+            override fun onResponse(call: Call?, response: Response) {
+                val responseData = JSONObject(response.body()?.string())
+                if (responseData.getString("status") == "true") {
+                    val getVersion = responseData.getString("version")
+                    if(getVersion != "") {
+                        if (getVersion.toLong() > this@MainActivity.packageManager.getPackageInfo("com.ispumap", 0).versionCode) {
+                            val intent = Intent(Intent.ACTION_VIEW)
+                            intent.data = Uri.parse("https://play.google.com/store/apps/details?id=com.ispumap")
+                            this@MainActivity.startActivity(intent)
+                        } else {
+                            toastMessage = "{none}"
+                        }
+                    } else {
+                        toastMessage = "Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini"
+                    }
+                } else {
+                    toastMessage = "Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini"
+                }
+            }
+            override fun onFailure(call: Call?, e: IOException?) {}
+        })
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -237,14 +240,8 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         loading = findViewById<ProgressBar>(R.id.loading)
         loading.visibility = View.VISIBLE
 
-//        val b = Builder()
-//        b.connectTimeout(120,TimeUnit.SECONDS)
-//        b.readTimeout(120, TimeUnit.SECONDS)
-//        b.writeTimeout(40, TimeUnit.SECONDS)
-//        client = b.build();
-
         if (isNetworkAvailable(this@MainActivity)) {
-            readVersion(this@MainActivity)
+            readVersion()
         } else {
             Toast.makeText(this@MainActivity,"Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini", Toast.LENGTH_SHORT).show()
         }
@@ -566,6 +563,15 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
     fun loadShowDetailStasiun() {
         if(!isShowDetailStasiun) Handler().postDelayed({loadShowDetailStasiun()}, 500)
         else showDetailStasiun()
+    }
+
+    fun toastShow(){
+        if(toastMessage == "") Handler().postDelayed({toastShow()}, 500)
+        else {
+            if(toastMessage != "{none}")
+                Toast.makeText(this@MainActivity, toastMessage, Toast.LENGTH_SHORT).show()
+            toastMessage = ""
+        }
     }
 
     private fun getReadyReloadLayer(){

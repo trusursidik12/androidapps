@@ -139,12 +139,6 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
         mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this@ProfileActivity);
 
-        if (isNetworkAvailable(this@ProfileActivity)) {
-            readVersion(this@ProfileActivity)
-        } else {
-            Toast.makeText(this@ProfileActivity,"Silakan periksa koneksi internet Anda, lalu mulai ulang Aplikasi ini", Toast.LENGTH_SHORT).show()
-        }
-
         mGoogleApiClient = GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
