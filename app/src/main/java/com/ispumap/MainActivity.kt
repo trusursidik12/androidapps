@@ -32,10 +32,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.maps.android.ui.IconGenerator
 import com.ispumap.OnMapAndViewReadyListener.OnGlobalLayoutAndMapReadyListener
@@ -453,23 +450,36 @@ class MainActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, Goo
         return if (count > 0) true else false
     }*/
 
-    fun drawMarker(lat:Double,lng:Double,title:String,category:String){
+    private fun getMarkerIcon(color: String?): BitmapDescriptor? {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(Color.parseColor(color), hsv)
+        return BitmapDescriptorFactory.defaultMarker(hsv[0])
+    }
+
+    private fun drawMarker(lat:Double,lng:Double,title:String,category:String){
         var color = getResources().getColor(R.color.NONE)
+        var s_color = "#00000000"
         if(category == "BAIK") {
             color = getResources().getColor(R.color.BAIK)
+            s_color = "#00FF00"
         } else if(category == "SEDANG") {
             color = getResources().getColor(R.color.SEDANG)
-        } else if(category == "TIDAK_SEHAT") {
-            color = getResources().getColor(R.color.TIDAK_SEHAT)
-        } else if(category == "SANGAT_TIDAK_SEHAT") {
+            s_color = "#0000FF"
+        } else if(category == "TIDAK SEHAT") {
+            color = getResources().getColor(R.color.STROKE_TIDAK_SEHAT)
+            s_color = "#FFFF00"
+        } else if(category == "SANGAT TIDAK SEHAT") {
             color = getResources().getColor(R.color.SANGAT_TIDAK_SEHAT)
+            s_color = "#FF0000"
         } else if(category == "BERBAHAYA") {
             color = getResources().getColor(R.color.BERBAHAYA)
+            s_color = "#301934"
         }
         val iconFactory = IconGenerator(this)
-        iconFactory.setColor(color)
         iconFactory.setTextAppearance(R.style.MarkerTitle);
-        val markerOptions = MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(title))).position(LatLng(lat, lng)).anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()).title(title)
+        iconFactory.setColor(color)
+//        val markerOptions = MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(title))).position(LatLng(lat, lng)).anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()).title(title)
+        val markerOptions = MarkerOptions().icon(getMarkerIcon(s_color)).position(LatLng(lat, lng))
         GMap.addMarker(markerOptions)
     }
 

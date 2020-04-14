@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -231,23 +232,14 @@ class ProfileActivity : AppCompatActivity(), OnGlobalLayoutAndMapReadyListener, 
         dialog.show()
     }
 
-    fun drawMarker(lat:Double,lng:Double,title:String,category:String){
-        var color = getResources().getColor(R.color.NONE)
-        if(category == "BAIK") {
-            color = getResources().getColor(R.color.BAIK)
-        } else if(category == "SEDANG") {
-            color = getResources().getColor(R.color.SEDANG)
-        } else if(category == "TIDAK_SEHAT") {
-            color = getResources().getColor(R.color.TIDAK_SEHAT)
-        } else if(category == "SANGAT_TIDAK_SEHAT") {
-            color = getResources().getColor(R.color.SANGAT_TIDAK_SEHAT)
-        } else if(category == "BERBAHAYA") {
-            color = getResources().getColor(R.color.BERBAHAYA)
-        }
-        val iconFactory = IconGenerator(this)
-        iconFactory.setColor(color)
-        iconFactory.setTextAppearance(R.style.MarkerTitle);
-        val markerOptions = MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(title))).position(LatLng(lat, lng)).anchor(iconFactory.getAnchorU(), iconFactory.getAnchorV()).title(title)
+    private fun getMarkerIcon(color: String?): BitmapDescriptor? {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(Color.parseColor(color), hsv)
+        return BitmapDescriptorFactory.defaultMarker(hsv[0])
+    }
+
+    private fun drawMarker(lat:Double,lng:Double,title:String,category:String){
+        val markerOptions = MarkerOptions().position(LatLng(lat, lng))
         GMap.addMarker(markerOptions)
     }
 
